@@ -1,41 +1,46 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Text, ScrollView, Dimensions, Alert, Image } from "react-native";
 
 import { images } from "../../constants";
-import { createUser, signUp } from "../../lib/api";
+import { registerUser } from "../../redux/slices/authSlice"; // Import register action
 import { CustomButton, FormField } from "../../components";
-import { useGlobalContext } from "../../context/GlobalProvider";
 
 const SignUp = () => {
-  const { setUser, setIsLogged } = useGlobalContext();
+  const dispatch = useDispatch();
+  const { user, error, loading } = useSelector((state) => state.auth); // Get state from Redux
 
-  const [isSubmitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     username: "",
     email: "",
     password: "",
   });
 
-  const submit = async () => {
-    if (form.username === "" || form.email === "" || form.password === "") {
+  // Handle form submission
+  const submit = () => {
+    if (!form.username || !form.email || !form.password) {
       Alert.alert("Error", "Please fill in all fields");
+      return;
     }
 
-    setSubmitting(true);
-    try {
-      const result = await signUp(form.email, form.password, form.username);
-      setUser(result);
-      setIsLogged(true);
-
-      router.replace("/home");
-    } catch (error) {
-      Alert.alert("Error", error.message);
-    } finally {
-      setSubmitting(false);
-    }
+    dispatch(registerUser(form));
   };
+
+  // Navigate to home if registration is successful
+  useEffect(() => {
+    if (user) {
+      router.replace("/home");
+    }
+  }, [user]);
+
+  // Show error message if registration fails
+  useEffect(() => {
+    if (error) {
+      Alert.alert("Registration Error", error);
+    }
+  }, [error]);
 
   return (
     <SafeAreaView className="bg-primary h-full">
@@ -46,6 +51,7 @@ const SignUp = () => {
             minHeight: Dimensions.get("window").height - 100,
           }}
         >
+          {/* Logo */}
           <View className="flex-row self-start">
             <Image
               source={images.logo_bg}
@@ -57,7 +63,8 @@ const SignUp = () => {
             </Text>
           </View>
 
-          <View className="flex-row self-start ">
+          {/* Signup Text */}
+          <View className="flex-row self-start">
             <Text className="text-white text-2xl ml-3 pt-3 font-pbold">
               Signup to
             </Text>
@@ -66,6 +73,7 @@ const SignUp = () => {
             </Text>
           </View>
 
+          {/* Form Fields */}
           <FormField
             title="Username"
             value={form.username}
@@ -86,23 +94,23 @@ const SignUp = () => {
             value={form.password}
             handleChangeText={(e) => setForm({ ...form, password: e })}
             otherStyles="mt-7"
+            secureTextEntry
           />
 
+          {/* Submit Button */}
           <CustomButton
             title="Sign Up"
             handlePress={submit}
             containerStyles="mt-7"
-            isLoading={isSubmitting}
+            isLoading={loading} // Use Redux state
           />
 
+          {/* Redirect to Login */}
           <View className="flex justify-center pt-5 flex-row gap-2">
             <Text className="text-lg text-gray-100 font-pregular">
               Have an account already?
             </Text>
-            <Link
-              href="/sign-in"
-              className="text-lg font-psemibold text-secondary"
-            >
+            <Link href="/sign-in" className="text-lg font-psemibold text-secondary">
               Login
             </Link>
           </View>

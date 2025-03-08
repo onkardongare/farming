@@ -7,6 +7,9 @@ import leaf from "../assets/images/leaf.png";
 import calculator from "../assets/images/calculator.png";
 import news1 from "../assets/images/news1.png";
 import news2 from "../assets/images/news2.png";
+import slide2 from "../assets/images/slide2.png";
+import slide3 from "../assets/images/slide3.png";
+import first from "../assets/images/first.png";
 
 import menu from "../assets/icons/menu.png";
 import next from "../assets/icons/next.png";
@@ -14,8 +17,7 @@ import banner from "../assets/images/banner.png";
 import fertilizer_icon from "../assets/images/fertilizer-icon.png";
 import crop_icon from "../assets/images/crop-icon.png";
 import area_icon from "../assets/images/area-icon.png";
+import kisan from "../assets/images/kisan.png";
 
 
-
-
-export default { profile, fertilizer_icon, slide1,crop_icon, area_icon, banner, next, empty, map, store, leaf, calculator, news1, news2, menu};
+export default { profile, fertilizer_icon, kisan, slide2, first, slide3, slide1,crop_icon, area_icon, banner, next, empty, map, store, leaf, calculator, news1, news2, menu};

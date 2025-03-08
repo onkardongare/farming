@@ -1,10 +1,9 @@
 import { View, Text, Image, TouchableOpacity, FlatList } from "react-native";
 import { Pencil, ShoppingBag, ScanBarcode, Info, ShieldCheck, Settings } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import {images} from "../../constants"
 
 const menuItems = [
-  { id: "1", title: "My orders", icon: <ShoppingBag size={20} color="black" /> },
-  { id: "2", title: "Scan products", icon: <ScanBarcode size={20} color="black" /> },
   { id: "3", title: "About Yara", icon: <Info size={20} color="black" /> },
   { id: "4", title: "Privacy and legal", icon: <ShieldCheck size={20} color="black" /> },
   { id: "5", title: "Settings", icon: <Settings size={20} color="black" /> },
@@ -13,14 +12,15 @@ const menuItems = [
 export default function ProfileScreen() {
   return (
     <SafeAreaView>
-      <View className="bg-gray-100 min-h-screen p-4">
+      <View className="bg-green-500 min-h-screen p-4">
+        <Text className="text-xl font-semibold mb-3">Profile</Text>
           {/* Profile Header */}
           <View className="bg-white rounded-lg shadow-sm p-4 items-center relative">
             <Image
-              source={{ uri: "https://via.placeholder.com/100" }} // Replace with actual profile picture
+              source={ images.kisan } // Replace with actual profile picture
               className="w-20 h-20 rounded-full mb-2"
             />
-            <Text className="text-lg font-semibold">+919699970325</Text>
+            <Text className="text-lg font-semibold">+91-XXXXXXXXXX</Text>
 
             {/* Edit Icon */}
             <TouchableOpacity className="absolute top-4 right-4">

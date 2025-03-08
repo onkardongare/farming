@@ -15,8 +15,17 @@ import crop from "../assets/icons/crop.png";
 import news from "../assets/icons/news.png";
 import next from "../assets/icons/next.png";
 import organic from "../assets/icons/organic.png";
+import cloud from "../assets/icons/cloud";
+import lightening from "../assets/icons/lightening.png";
+import rain from "../assets/icons/rain.png";
+import sun from "../assets/icons/sun.png";
+
 
 export default {
+  cloud,
+  sun,
+  rain,
+  lightening,
   play,
   bookmark,
   home,

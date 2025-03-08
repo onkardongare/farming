@@ -1,16 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Text, ScrollView, Dimensions, Alert, Image } from "react-native";
+import {useDispatch, useSelector } from 'react-redux'
+import {loginUser} from "../../redux/slices/authSlice";
 
 import { images } from "../../constants";
 import { CustomButton, FormField } from "../../components";
-import { getCurrentUser, signIn } from "../../lib/api";
-import { useGlobalContext } from "../../context/GlobalProvider";
+
 
 const SignIn = () => {
-  const { setUser, setIsLogged } = useGlobalContext(); 
-  const [isSubmitting, setSubmitting] = useState(false);
+  const dispatch = useDispatch();
+  const {loading, error, user} = useSelector((state) => state.auth);
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -19,33 +20,26 @@ const SignIn = () => {
   const submit = async () => {
     if (form.email === "" || form.password === "") {
       Alert.alert("Error", "Please fill in all fields");
+      return;
     }
-
-    setSubmitting(true);
 
     try {
-      console.log('sign-in',signIn)
-      const result = await signIn(form.email, form.password);
-      console.log('sign-in', result)
-      setUser(result);
-      setIsLogged(true);
-
-      Alert.alert("Success", "User signed in successfully");
-      router.replace("/home");
-    }catch (error) {
-      console.log("Sign-in error:", error);
-    
-      // Ensure error is a string before passing to Alert.alert
-      const errorMessage =
-        typeof error === "string"
-          ? error
-          : error?.message || "Something went wrong";
-    
-      Alert.alert("Error", errorMessage);
-    } finally {
-      setSubmitting(false);
-    }
+      const userData = await dispatch(loginUser({ email: form.email, password: form.password })).unwrap();
+      console.log("User logged in:", userData);
+    } catch (error) {
+      console.log("Error:", error);
+      Alert.alert("Error", error.message || "Something went wrong.");
+    } 
   };
+
+  //Redirect if user is logged in
+  useEffect(()=>{
+    if(user){
+      console.log("nothing")
+      Alert.alert("Success", "User signed in successfully");
+      router.replace("/home")
+    }
+  },[user]);
 
   return (
     <SafeAreaView className="bg-primary h-full">
@@ -95,7 +89,7 @@ const SignIn = () => {
             title="Sign In"
             handlePress={submit}
             containerStyles="mt-7"
-            isLoading={isSubmitting}
+            isLoading={loading}
           />
 
           <View className="flex justify-center pt-5 flex-row gap-2">

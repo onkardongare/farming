@@ -28,7 +28,7 @@ const posts = [
 export default function Organic() {
   return (
     <SafeAreaView>
-      <View className="p-4 bg-gray-100 min-h-screen">
+      <View className="p-4 bg-green-500 min-h-screen">
             <Text className="text-xl font-semibold mb-3">Newsfeed</Text>
     
             <FlatList
