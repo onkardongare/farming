@@ -1,26 +1,24 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, Dimensions } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, TouchableOpacity, TextInput, Modal, StyleSheet, Alert, Dimensions } from 'react-native';
 import MapView, { Polygon, Marker, UrlTile } from 'react-native-maps';
-import { NativeWindStyleSheet } from 'nativewind';
 import { StatusBar } from 'expo-status-bar';
 import * as turf from '@turf/turf';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from 'expo-router';
+import { useDispatch } from 'react-redux';
+import { createField } from "@/redux/slices/fieldSlice";
+import { Picker } from '@react-native-picker/picker';  // Import Picker
 
-// Configure NativeWind
-NativeWindStyleSheet.setOutput({
-  default: 'native',
-});
 
 export default function FieldScreen() {
-  const navigation = useNavigation()
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
   const [coordinates, setCoordinates] = useState([]);
   const [area, setArea] = useState(0);
+  const [showForm, setShowForm] = useState(false);
+  const [fieldName, setFieldName] = useState('');
+  const [description, setDescription] = useState('');
   const mapRef = useRef(null);
-
-  useEffect(() => {
-    console.log('Component mounted');
-  }, []);
 
   const onMapPress = (event) => {
     const newCoord = event.nativeEvent.coordinate;
@@ -29,7 +27,6 @@ export default function FieldScreen() {
       if (newCoords.length >= 4) calculateArea(newCoords);
       return newCoords;
     });
-    console.log('Map pressed, new coordinate:', newCoord);
   };
 
   const calculateArea = (coords) => {
@@ -37,12 +34,11 @@ export default function FieldScreen() {
       setArea(0);
       return;
     }
-    const closedCoords = [...coords, coords[0]]; // Ensure polygon closure
+    const closedCoords = [...coords, coords[0]];
     const polygon = turf.polygon([closedCoords.map((c) => [c.longitude, c.latitude])]);
     const areaInSqMeters = turf.area(polygon);
-    const areaInAcres = areaInSqMeters * 0.000247105; // Convert to acres
+    const areaInAcres = areaInSqMeters * 0.000247105;
     setArea(areaInAcres);
-    console.log('Calculated area:', areaInAcres);
   };
 
   const resetDrawing = () => {
@@ -73,91 +69,114 @@ export default function FieldScreen() {
 
   const handleFieldCreation = () => {
     if (coordinates.length >= 4) {
+      dispatch(createField({ name: fieldName, description, coordinates, area }));
+      setShowForm(false);
       Alert.alert('Success', 'Field created successfully!');
-      console.log('Field Created:', coordinates);
+      setCoordinates([]); // Reset after creation
     } else {
       Alert.alert('Error', 'Please draw a field with at least 4 points.');
     }
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100" style={styles.safeArea}>
+    <SafeAreaView className="flex-1 bg-gray-100">
+      {/* Map View */}
       <MapView
         ref={mapRef}
         mapType="hybrid"
         style={styles.map}
-        initialRegion={{
-          latitude: 37.78825,
-          longitude: -122.4324,
-          latitudeDelta: 0.5,
-          longitudeDelta: 0.5,
-        }}
+        initialRegion={{ latitude: 19.076090, longitude: 72.877426, latitudeDelta: 0.5, longitudeDelta: 0.5 }}
         onPress={onMapPress}
       >
-        {console.log('MapView rendering')}
-        <UrlTile
-          urlTemplate="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          maximumZ={19}
-          zIndex={0} // Ensure tiles are below markers
-        />
-        {coordinates.length > 3 && (
-          <Polygon
-            coordinates={[...coordinates, coordinates[0]]}
-            strokeColor="#FF1493"
-            fillColor="rgba(255, 20, 147, 0.3)"
-            strokeWidth={2}
-          />
-        )}
+        <UrlTile urlTemplate="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" maximumZ={19} />
+        {coordinates.length > 3 && <Polygon coordinates={[...coordinates, coordinates[0]]} strokeColor="#FF1493" fillColor="rgba(255, 20, 147, 0.3)" strokeWidth={2} />}
         {coordinates.map((coord, index) => (
-          <Marker
-            key={index}
-            coordinate={coord}
-            pinColor="#FF1493"
-            draggable
-            onDragEnd={(e) => updateMarkerPosition(index, e.nativeEvent.coordinate)}
-          />
+          <Marker key={index} coordinate={coord} pinColor="#FF1493" />
         ))}
       </MapView>
 
       {/* Buttons */}
       <View className="absolute pt-6 top-4 left-4 flex-row z-10">
-        {/* Back Button */}
-        <TouchableOpacity
+         {/* Back Button */}
+         <TouchableOpacity
           className="bg-blue-500 rounded-md px-4 py-2 shadow-md mr-2"
           onPress={() => navigation.goBack()} // Ensure navigation is available
         >
-          <Text className="text-white">ss</Text>
+          <Text className="text-white">🔙</Text>
         </TouchableOpacity>
         <TouchableOpacity
           className="bg-white rounded-md px-4 py-2 shadow-md mr-2"
           onPress={undoLastStep}
           disabled={coordinates.length === 0}
         >
-          <Text className="text-gray-600">Undo</Text>
+          <Text className="text-gray-600">↩️</Text>
         </TouchableOpacity>
         <TouchableOpacity
           className="bg-red-500 rounded-md px-4 py-2 shadow-md"
           onPress={resetDrawing}
         >
-          <Text className="text-white">Reset</Text>
+          <Text className="text-white">🔄</Text>
         </TouchableOpacity>
-      </View>
+      </View>      
 
       {/* Bottom Panel */}
       <View className="absolute bottom-4 left-4 right-4 bg-white rounded-lg p-4 shadow-md">
         <Text className="text-lg font-semibold text-gray-800">Draw your field</Text>
         <Text className="text-gray-600 mt-1">Tap on the map to draw the field</Text>
-        {coordinates.length > 3 && (
-          <Text className="text-gray-800 mt-2">Area: {area.toFixed(2)} acres</Text>
-        )}
-        <TouchableOpacity
-          className="bg-blue-500 rounded-md mt-4 py-2"
-          onPress={handleFieldCreation}
-          disabled={coordinates.length < 4}
-        >
+        {coordinates.length > 3 && <Text className="text-gray-800 mt-2">Area: {area.toFixed(2)} acres</Text>}
+        <TouchableOpacity className="bg-blue-500 rounded-md mt-4 py-2" onPress={() => setShowForm(true)} disabled={coordinates.length < 4}>
           <Text className="text-white text-center font-semibold">Create field</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Modal Form */}
+      <Modal visible={showForm} animationType="slide" transparent> 
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text className="text-lg font-semibold text-gray-800">Enter Field Details</Text>
+
+            {/* Farm Name Input */}
+            <TextInput 
+              style={styles.input} 
+              placeholder="Farm Name" 
+              value={farmName} 
+              onChangeText={setFarmName} 
+            />
+
+            {/* Crop Name Input */}
+            <TextInput 
+              style={styles.input} 
+              placeholder="Crop Name" 
+              value={crop} 
+              onChangeText={setCrop}  
+            />
+
+            {/* Irrigation Type Dropdown */}
+            <Text className="text-gray-700 mt-2">Select Irrigation Type</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={irrigationType}
+                onValueChange={(itemValue) => setIrrigationType(itemValue)}
+              >
+                <Picker.Item label="Drip" value="Drip" />
+                <Picker.Item label="Sprinkler" value="Sprinkler" />
+                <Picker.Item label="Flood" value="Flood" />
+                <Picker.Item label="Manual" value="Manual" />
+              </Picker>
+            </View>
+
+            {/* Buttons */}
+            <View style={styles.modalButtons}>
+              <TouchableOpacity className="bg-gray-400 rounded-md py-2 px-4" onPress={() => setShowForm(false)}>
+                <Text className="text-white">Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity className="bg-green-500 rounded-md py-2 px-4 ml-2" onPress={handleFieldCreation}>
+                <Text className="text-white">Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <StatusBar style="dark" />
     </SafeAreaView>
@@ -165,11 +184,33 @@ export default function FieldScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
   map: {
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height,
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 10,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 10,
+  },
 });
+

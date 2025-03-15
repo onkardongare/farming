@@ -7,17 +7,23 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchWeather } from "@/redux/slices/weatherSlice";
 
 export default function HomeScreen() {
-
   const dispatch = useDispatch()
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const {user} = useSelector((state) => state.auth)
-  const {loading, error, weather} = useSelector((state) => state.weather)
+  const { loading, error, weatherData, sprayingConditions } = useSelector((state) => state.weather);
 
   useEffect(()=>{
     if(user){
       console.log("Fetching weather..."); // Debug log
-      dispatch(fetchWeather({latitude:72.877426, longitude:19.076090}))
+      console.log(user)
+    }
+  },[user])
+
+  useEffect(()=>{
+    if(user){
+      console.log("Fetching weather..."); // Debug log
+      dispatch(fetchWeather({latitude: user.location.latitude, longitude: user.location.longitude}))
     }
   },[user])
 
@@ -35,7 +41,44 @@ export default function HomeScreen() {
       setMenuOpen(false);
     }
   }
-
+  
+  // Get the current hour
+  const currentHour = new Date().getHours(); // Use local time instead of UTC
+  
+  // Find the current hour's spraying condition
+  const currentCondition = sprayingConditions?.find(condition => {
+    if (!condition.time) return false; // Ensure time exists
+  
+        // Extract the hour from the time string
+        const conditionHour = parseInt(condition.time.split(":")[0], 10);
+        console.log(`Checking condition: ${condition.time} => Hour: ${conditionHour}, Current: ${currentHour}`);
+        if(conditionHour > currentHour){
+          return true;
+        }
+        
+        return conditionHour === currentHour;
+  });
+  const getStatusSymbol = (status) => {
+    switch (status) {
+        case "Good":
+            return "✅"; 
+        case "Moderate":
+            return "⚠️"; 
+        case "Not Suitable":
+            return "❌";
+        default:
+            return "";
+    }
+  };
+  const getTime = () => {
+    if(currentHour < 12){
+      return `${currentHour} AM : `;
+    }
+    else{
+      return `${currentHour} PM : `;
+    }
+};
+  
   return (
     // <TouchableWithoutFeedback onPress={closeMenu}>
       <SafeAreaView className="flex-1 relative">
@@ -79,36 +122,74 @@ export default function HomeScreen() {
           {/* Other Content */}
           <View className="mt-4">
             <Text className="text-lg font-pbold">Weather Information</Text>
-            <View className="flex-row justify-between mt-2">
-              
+            <View className="flex-row justify-between mt-2 mr-1">  
               {/* Weather Box */}
-              <View className="bg-blue-100 p-3 rounded-lg w-1/2">
-                <Text className="text-blue-800 font-pbold">Weather</Text>
-                <ScrollView className="h-20">
-                <TouchableOpacity onPress={() => router.push("/(screens)/weather")}>
-                  
-                  {/* <Text className="text-sm text-gray-600">
-                    ☀️ Sunny, 30°C{"\n"}
-                    💨 Wind: 10 km/h NE{"\n"}
-                    🌧️ Rain: 10% chance
-                  </Text> */}
+              <View className="bg-green-100 p-3 rounded-lg w-1/2 mr-1">
+               <TouchableOpacity onPress={() => router.push("/(screens)/weather")}>
+                <Text className="text-green-800 font-pbold">Weather </Text>
+                  {weatherData && weatherData.hourly?.length > 0 ? (
+                    <View>
+                      <View className="flex-row items-center">
+                          <Image 
+                            source={icons[weatherData.hourly[0].icon]} // Matching API response with local icons
+                            className="h-6 w-6"
+                          />
+                          <Text className="text-sm text-gray-600 ml-2"> {weatherData.hourly[0].desc}, {weatherData.hourly[0].temp}</Text>
+                      </View>
+                      <View className="flex-row items-center mt-1">
+                          <Image 
+                            source={icons.air_speed} // Matching API response with local icons
+                            className="h-6 w-6"
+                          />
+                          <Text className="text-sm text-gray-600 ml-2"> Wind: {weatherData.hourly[0].wind_speed} m/s</Text>
+                      </View>
+                      <View className="flex-row items-center mt-1">
+                          <Image 
+                            source={icons.humidity} // Matching API response with local icons
+                            className="h-6 w-6"
+                          />
+                          <Text className="text-sm text-gray-600 ml-2"> Humidity: {weatherData.hourly[0].humidity}%</Text>
+                      </View>
+                    </View>                    
+                  ) : (
+                    <Text className="text-sm text-gray-600">Loading weather...</Text>
+                  )}
                 </TouchableOpacity>
-                </ScrollView>
               </View>
 
               {/* Spraying Condition Box */}
-              <View className="bg-green-100 p-3 rounded-lg w-1/2 ml-2">
-                <Text className="text-green-800 font-pbold">Spraying Condition</Text>
-                <ScrollView className="h-20">
-                  <Text className="text-sm text-gray-600">
-                    ✅ Suitable for spraying{"\n"}
-                    🕒 Best: 6 AM - 10 AM{"\n"}
-                    ❌ Avoid strong winds/rain
-                  </Text>
-                </ScrollView>
-              </View>
-              
-            </View>
+              <View className="bg-green-100 p-3 rounded-lg w-1/2">
+                  <Text className="text-green-800 font-pbold">Spraying Condition</Text>
+                      {currentCondition ? (
+                        <View>
+                            <View className="flex-row items-center mt-1">
+                              <Text className="text-sm font-pbold text-gray-950 pt-1">
+                                  {getTime()}
+                              </Text>
+                              <Text className="text-sm text-gray-600 pt-1">
+                                 {getStatusSymbol(currentCondition.status)} 
+                              </Text>
+                              <Text className="text-sm text-gray-600 pt-1">
+                                 {currentCondition.status }
+                              </Text>
+                            </View>
+                            <View className="flex-row items-center mt-1">
+                              <Text className="text-sm font-pbold text-gray-950 pt-1">
+                                  Best :{' '}
+                              </Text>
+                              <Text className="text-sm text-gray-600 pt-1">
+                                  6AM - 10AM
+                              </Text>
+                            </View>
+                           <Text className="text-sm font-pbold text-gray-600 pt-1">
+                             ❌ Avoid strong winds/rain
+                           </Text>
+                        </View>
+                      ) : (
+                        <Text className="text-sm text-gray-600">No data available</Text>
+                      )}
+                  </View>
+            </View>     
           </View>
 
           {/* Features Section */}

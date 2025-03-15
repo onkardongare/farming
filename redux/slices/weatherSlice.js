@@ -5,32 +5,40 @@ console.log(apiClient)
 
 // Function to classify spraying conditions
 const classifySprayingCondition = (weatherData) => {
+    if (!weatherData || !weatherData.hourly) return []; // Avoid crashes
+  
     return weatherData.hourly.map((entry) => {
-        const { time, temp, humidtity, wind_speed } = entry;
-        let status = "Not Suitable";
-
-        if (temp > 32 || humidtity < 30 || wind_speed > 5) {
-            status = "Not Suitable"; // Too hot, too dry, or too windy
-        } else if ((temp >= 30 && temp <= 32) || (humidtity >= 30 && humidtity < 50) || (wind_speed >= 3 && wind_speed <= 5)) {
-            status = "Moderate"; // Acceptable but not perfect
-        } else if (temp < 30 && humidtity >= 50 && wind_speed <= 3) {
-            status = "Good"; // Ideal conditions
-        }
-
-        return { time, temp, humidtity, wind_speed, status };
+      const { time, temp, humidity, wind_speed } = entry;
+      let status = "Not Suitable";
+  
+      if (temp > 32 || humidity < 30 || wind_speed > 5) {
+        status = "Not Suitable";
+      } else if ((temp >= 30 && temp <= 32) || (humidity >= 30 && humidity < 50) || (wind_speed >= 3 && wind_speed <= 5)) {
+        status = "Moderate";
+      } else if (temp < 30 && humidity >= 50 && wind_speed <= 3) {
+        status = "Good";
+      }
+      console.log("status :",status)
+  
+      return { time, temp, humidity, wind_speed, status };
     });
-};
+  };
+  
 
 // Async thunk to fetch all weather data
-export const fetchWeather = createAsyncThunk("weather/fetchWeather", async (_, { rejectWithValue }) => {
-    try {
-        const response = await apiClient.get("/weather/weather");
+export const fetchWeather = createAsyncThunk(
+    "fetchWeather",
+    async ({latitude, longitude}, { rejectWithValue }) => {
+      try {
+        const response = await apiClient.get(`/weather/weather?latitude=${latitude}&longitude=${longitude}`);
         return response.data;
-    } catch (error) {
+      } catch (error) {
+        console.log("Weather Fetch Error:", error); // Debug log
         return rejectWithValue(error.response?.data || "Failed to fetch weather data");
+      }
     }
-});
-
+  );
+  
 // Weather slice
 const weatherSlice = createSlice({
     name: "weather",

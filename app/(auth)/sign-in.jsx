@@ -5,7 +5,7 @@ import { View, Text, ScrollView, Dimensions, Alert, Image } from "react-native";
 import {useDispatch, useSelector } from 'react-redux'
 import {loginUser} from "../../redux/slices/authSlice";
 
-import { images } from "../../constants";
+import { icons, images } from "../../constants";
 import { CustomButton, FormField } from "../../components";
 
 
@@ -50,14 +50,15 @@ const SignIn = () => {
             minHeight: Dimensions.get("window").height - 100,
           }}
         >
+          {/* Logo */}
           <View className="flex-row self-start">
             <Image
-              source={images.logo_bg}
+              source={icons.logo}
               className="w-[70px] h-[80px] mb-2 ml-2"
               resizeMode="contain"
             />
             <Text className="text-yellow-300 text-4xl ml-4 pt-8 font-pbold">
-              Lal Pari
+            Organic Mitr
             </Text>
           </View>
 
@@ -66,7 +67,7 @@ const SignIn = () => {
               Sign In to
             </Text>
             <Text className="text-yellow-300 text-2xl ml-2 pt-3 font-pbold">
-              Lal Pari
+              Organic Mitr
             </Text>
           </View>
 
@@ -97,7 +98,7 @@ const SignIn = () => {
               Don't have an account?
             </Text>
             <Link
-              href="/sign-up"
+              href="/register"
               className="text-lg font-psemibold text-secondary"
             >
               Signup

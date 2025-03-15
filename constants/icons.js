@@ -15,13 +15,27 @@ import crop from "../assets/icons/crop.png";
 import news from "../assets/icons/news.png";
 import next from "../assets/icons/next.png";
 import organic from "../assets/icons/organic.png";
-import cloud from "../assets/icons/cloud";
+import cloud from "../assets/icons/cloud.png";
 import lightening from "../assets/icons/lightening.png";
 import rain from "../assets/icons/rain.png";
+import partly_cloudy_sun from "../assets/icons/partly_cloudy_sun.png";
+import night from "../assets/icons/night.png";
 import sun from "../assets/icons/sun.png";
+import temperature from "../assets/icons/temperature.png";
+import humidity from "../assets/icons/humidity.png";
+import air_speed from "../assets/icons/air_speed.png";
+import air_pressure from "../assets/icons/air_pressure.png";
+import logo from "../assets/icons/logo.png";
 
 
 export default {
+  logo,
+  air_pressure,
+  air_speed,
+  humidity,
+  temperature,
+  partly_cloudy_sun,
+  night,
   cloud,
   sun,
   rain,

@@ -4,7 +4,7 @@ import { Link, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Text, ScrollView, Dimensions, Alert, Image } from "react-native";
 
-import { images } from "../../constants";
+import { icons, images } from "../../constants";
 import { registerUser } from "../../redux/slices/authSlice"; // Import register action
 import { CustomButton, FormField } from "../../components";
 
@@ -15,6 +15,11 @@ const SignUp = () => {
   const [form, setForm] = useState({
     username: "",
     email: "",
+    mobile: "",
+    village: "",
+    taluka: "",
+    pincode: "",
+    state: "",
     password: "",
   });
 
@@ -46,7 +51,7 @@ const SignUp = () => {
     <SafeAreaView className="bg-primary h-full">
       <ScrollView>
         <View
-          className="w-full flex justify-center h-full px-4 my-6"
+          className="w-full flex justify-center h-full px-4"
           style={{
             minHeight: Dimensions.get("window").height - 100,
           }}
@@ -54,66 +59,94 @@ const SignUp = () => {
           {/* Logo */}
           <View className="flex-row self-start">
             <Image
-              source={images.logo_bg}
+              source={icons.logo}
               className="w-[70px] h-[80px] mb-2 ml-2"
               resizeMode="contain"
             />
             <Text className="text-yellow-300 text-4xl ml-4 pt-8 font-pbold">
-              Lal Pari
+            Organic Mitr
             </Text>
           </View>
 
           {/* Signup Text */}
           <View className="flex-row self-start">
-            <Text className="text-white text-2xl ml-3 pt-3 font-pbold">
-              Signup to
-            </Text>
-            <Text className="text-yellow-300 text-2xl ml-2 pt-3 font-pbold">
-              Lal Pari
+            <Text className="text-white text-lg ml-1 pt-1 font-pbold">
+              Fill Below Inforamtion
             </Text>
           </View>
 
           {/* Form Fields */}
           <FormField
-            title="Username"
+            title="Username *"
             value={form.username}
             handleChangeText={(e) => setForm({ ...form, username: e })}
-            otherStyles="mt-10"
+            otherStyles="mt-3"
           />
 
           <FormField
-            title="Email"
+            title="Email *"
             value={form.email}
             handleChangeText={(e) => setForm({ ...form, email: e })}
-            otherStyles="mt-7"
+            otherStyles="mt-3"
             keyboardType="email-address"
           />
 
           <FormField
-            title="Password"
+            title="Mobile No. *"
+            value={form.mobile}
+            handleChangeText={(e) => {
+              const numericValue = e.replace(/[^0-9]/g, ' ').slice(0, 10); // Max 10 digits
+              setForm({ ...form, mobile: numericValue });
+            }}
+            otherStyles="mt-3"
+            keyboardType="phone-pad"
+          />
+          <FormField
+            title="Pin Code *"
+            value={form.pincode}
+            handleChangeText={(e) => {
+              const numericValue = e.replace(/[^0-9]/g, ' ').slice(0, 6); // Max 10 digits
+              setForm({ ...form, pincode: numericValue });
+            }}
+            otherStyles="mt-3"
+            keyboardType="phone-pad"
+          />
+
+          <FormField
+            title="Village *"
+            value={form.village}
+            handleChangeText={(e) => setForm({ ...form, village: e })}
+            otherStyles="mt-3"
+          />
+
+          <FormField
+          title="Taluka *"
+          value={form.taluka}
+          handleChangeText={(e) => setForm({ ...form, taluka: e })}
+          otherStyles="mt-3"
+          />
+          <FormField
+            title="State *"
+            value={form.state}
+            handleChangeText={(e) => setForm({ ...form, state: e })}
+            otherStyles="mt-3"
+          />
+
+          <FormField
+            title="Password *"
             value={form.password}
             handleChangeText={(e) => setForm({ ...form, password: e })}
-            otherStyles="mt-7"
+            otherStyles="mt-3"
             secureTextEntry
           />
 
           {/* Submit Button */}
           <CustomButton
-            title="Sign Up"
+            title="Submit"
             handlePress={submit}
-            containerStyles="mt-7"
+            containerStyles="mt-7 mb-6"
             isLoading={loading} // Use Redux state
           />
-
-          {/* Redirect to Login */}
-          <View className="flex justify-center pt-5 flex-row gap-2">
-            <Text className="text-lg text-gray-100 font-pregular">
-              Have an account already?
-            </Text>
-            <Link href="/sign-in" className="text-lg font-psemibold text-secondary">
-              Login
-            </Link>
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

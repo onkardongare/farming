@@ -7,7 +7,7 @@ import { images } from "../constants";
 const pages = [
   {
     id: 1,
-    title: "Welcome to GreenHarvest! 🌱",
+    title: "Welcome to          Organic Mitr! 🌱",
     text: "Your journey to organic farming starts here.",
     subtext: "Grow naturally, thrive sustainably.",
     icon: Leaf,
@@ -16,16 +16,16 @@ const pages = [
   {
     id: 2,
     title: "Track Your Crops 📈",
-    text: "Watch your plants grow day by day.",
+    text: "Watch your plants grow day by day and moniter them.",
     subtext: "Monitor progress with ease.",
     icon: BarChart2,
     image: images.slide2,
   },
   {
     id: 3,
-    title: "Learn & Connect 🌍",
-    text: "Master organic techniques and join our community.",
-    subtext: "Ready to plant your first seed?",
+    title: "Learn & Save 🌍",
+    text: "Master organic and cost efficient techniques.",
+    subtext: "Ready to plant your first seed? ",
     icon: Users,
     image: images.slide3,
   },
@@ -43,7 +43,7 @@ export default function OnboardingScreens() {
       setIndex(index + 1);
       scrollViewRef.current?.scrollTo({ x: width * (index + 1), animated: true });
     } else {
-      router.replace("/home");
+      router.replace("/register");
     }
   };
 
@@ -108,7 +108,7 @@ export default function OnboardingScreens() {
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    onPress={() => router.push("/sign-in")}
+                    onPress={() => router.push("/register")}
                     className="p-3 rounded-xl w-44 items-center"
                   >
                     <Text className="text-blue-500 text-lg">Skip</Text>

@@ -5,9 +5,11 @@ import apiClient from "../../api/api";
 // Create a new field
 export const createField = createAsyncThunk("fields/createField", async (fieldData, { rejectWithValue }) => {
   try {
-    const response = await axios.post(apiClient, fieldData, { withCredentials: true });
+    const response = await apiClient.post('/field/createField', fieldData, { withCredentials: true });
+    console.log('erere',response)
     return response.data;
   } catch (error) {
+    console.log(error.message)
     return rejectWithValue(error.response?.data || error.message);
   }
 });
